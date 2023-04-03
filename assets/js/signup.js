@@ -24,8 +24,9 @@ function createUser(event) {
             password: password,
         }
     }).done(() => {
-
-    }).fail(() => {
-
+        alert("User signup successfully")
+    }).fail((error) => {
+        console.log(error);
+        alert("Error")
     });
 };

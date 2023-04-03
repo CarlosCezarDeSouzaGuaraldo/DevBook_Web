@@ -3,7 +3,6 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
-	"log"
 	"net/http"
 	"web/src/responses"
 )
@@ -24,7 +23,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		"password": password,
 	})
 	if err != nil {
-		log.Fatal(err)
+		responses.JSON(w, http.StatusBadRequest, responses.ErrorAPI{Err: err.Error()})
 		return
 	}
 
@@ -34,10 +33,15 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		bytes.NewBuffer(user),
 	)
 	if err != nil {
-		log.Fatal(err)
+		responses.JSON(w, http.StatusInternalServerError, responses.ErrorAPI{Err: err.Error()})
 		return
 	}
 	defer response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		responses.FixStatusCodeError(w, response)
+		return
+	}
 
 	responses.JSON(w, response.StatusCode, nil)
 }
