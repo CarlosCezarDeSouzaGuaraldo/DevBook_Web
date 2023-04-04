@@ -14,3 +14,9 @@ func LoadLoginScreen(w http.ResponseWriter, r *http.Request) {
 func LoadSignupScreen(w http.ResponseWriter, r *http.Request) {
 	utils.ExecuteTemplate(w, "signup.html", nil)
 }
+
+// LoadHomePage render the home screen
+func LoadHomePage(w http.ResponseWriter, r *http.Request) {
+	
+	utils.ExecuteTemplate(w, "home.html", nil)
+}

@@ -6,22 +6,20 @@ import (
 	"fmt"
 	"net/http"
 	"web/src/config"
+	"web/src/cookies"
+	"web/src/models"
 	"web/src/responses"
 )
 
-// CreateUser do a request on API to create an user
-func CreateUser(w http.ResponseWriter, r *http.Request) {
+// DoLogin use the e-mail and password to login the user
+func DoLogin(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
-	name := r.FormValue("name")
 	email := r.FormValue("email")
-	nick := r.FormValue("nick")
 	password := r.FormValue("password")
 
 	user, err := json.Marshal(map[string]string{
-		"name":     name,
 		"email":    email,
-		"nick":     nick,
 		"password": password,
 	})
 	if err != nil {
@@ -29,7 +27,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	url := fmt.Sprintf("%s/users", config.URL_API)
+	url := fmt.Sprintf("%s/login", config.URL_API)
 
 	response, err := http.Post(
 		url,
@@ -47,5 +45,16 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responses.JSON(w, response.StatusCode, nil)
+	var authData models.AuthData
+	if err = json.NewDecoder(response.Body).Decode(&authData); err != nil {
+		responses.JSON(w, http.StatusUnprocessableEntity, responses.ErrorAPI{Err: err.Error()})
+		return
+	}
+
+	if err = cookies.Save(w, authData.ID, authData.Token); err != nil {
+		responses.JSON(w, http.StatusUnprocessableEntity, responses.ErrorAPI{Err: err.Error()})
+		return
+	}
+
+	responses.JSON(w, http.StatusOK, nil)
 }
