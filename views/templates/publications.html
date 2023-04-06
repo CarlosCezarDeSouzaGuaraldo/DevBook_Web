@@ -1,0 +1,44 @@
+{{ define "likes" }}
+<i class="fa-solid fa-heart like-publication"></i>
+<span>{{ .Likes }}</span>
+{{ end }}
+
+{{ define "edit" }}
+<a href="/edit" class="text-decoration-none">
+    <i class="fa-solid fa-pen-to-square"></i>
+</a>
+{{ end }}
+
+{{ define "remove" }}
+<a href="/remove" class="text-decoration-none">
+    <i class="fa-solid fa-trash text-danger"></i>
+</a>
+{{ end }}
+
+{{ define "header-publication" }}
+<h1 class="display-4">{{ .Title }}</h1>
+<p class="lead">{{ .Content }}</p>
+<a href="#" class="text-decoration-none">
+    {{ .AuthorNick }} - {{ .CreatedAt.Format "02/01/2006" }}
+</a>
+<hr class="my-4">
+{{ end }}
+
+{{ define "publication-allowed" }}
+<div class="jumbotron" data-publication-id="{{ .ID }}">
+    {{ template "header-publication" . }}
+    <p>
+        {{ template "likes" . }}
+        {{ template "edit" . }}
+        {{ template "remove" . }}
+    </p>
+</div>
+{{ end }}
+
+
+{{ define "publication-not-allowed" }}
+<div class="jumbotron" data-publication-id="{{ .ID }}">
+    {{ template "header-publication" . }}
+    {{ template "likes" . }}
+</div>
+{{ end }}

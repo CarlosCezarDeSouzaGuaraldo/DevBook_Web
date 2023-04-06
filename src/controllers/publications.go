@@ -5,12 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"web/src/config"
 	"web/src/requests"
 	"web/src/responses"
+
+	"github.com/gorilla/mux"
 )
 
-// CreatePublication
+// CreatePublication send a request on API to create a publication
 func CreatePublication(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
@@ -37,5 +40,54 @@ func CreatePublication(w http.ResponseWriter, r *http.Request) {
 	}
 
 	responses.JSON(w, response.StatusCode, nil)
+}
 
+// LikePublication send a request on API to like a publication
+func LikePublication(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	publicationID, err := strconv.ParseUint(params["publicationId"], 10, 64)
+	if err != nil {
+		responses.JSON(w, http.StatusBadRequest, responses.ErrorAPI{Err: err.Error()})
+		return
+	}
+
+	url := fmt.Sprintf("%s/publications/%d/like", config.URL_API, publicationID)
+	response, err := requests.DoAuthRequest(r, http.MethodPost, url, nil)
+	if err != nil {
+		responses.JSON(w, http.StatusInternalServerError, responses.ErrorAPI{Err: err.Error()})
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		responses.FixStatusCodeError(w, response)
+		return
+	}
+
+	responses.JSON(w, response.StatusCode, nil)
+}
+
+// UnlikePublication send a request on API to like a publication
+func UnlikePublication(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	publicationID, err := strconv.ParseUint(params["publicationId"], 10, 64)
+	if err != nil {
+		responses.JSON(w, http.StatusBadRequest, responses.ErrorAPI{Err: err.Error()})
+		return
+	}
+
+	url := fmt.Sprintf("%s/publications/%d/unlike", config.URL_API, publicationID)
+	response, err := requests.DoAuthRequest(r, http.MethodPost, url, nil)
+	if err != nil {
+		responses.JSON(w, http.StatusInternalServerError, responses.ErrorAPI{Err: err.Error()})
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		responses.FixStatusCodeError(w, response)
+		return
+	}
+
+	responses.JSON(w, response.StatusCode, nil)
 }

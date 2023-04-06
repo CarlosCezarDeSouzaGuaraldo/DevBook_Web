@@ -38,19 +38,11 @@
             </div>
             <div class="col-xs-12 col-sm-12 col-md-7 col-lg-7 col-xl-7">
                 {{ range .Publications }}
-                <div class="jumbotron">
-                    <h1 class="display-4">{{ .Title }}</h1>
-                    <p class="lead">{{ .Content }}</p>
-                    <a href="#">{{ .AuthorNick }} - {{ .CreatedAt }}</a>
-
                     {{ if (eq .AuthorID $.UserID) }}
-                    <button>Like</button>
-                    <button>Edit</button>
-                    <button>Remove</button>
+                        {{ template "publication-allowed" . }}
                     {{ else }}
-                    <button>Like</button>
+                        {{ template "publication-not-allowed" . }}
                     {{ end }}
-                </div>
                 {{ end }}
             </div>
         </div>
