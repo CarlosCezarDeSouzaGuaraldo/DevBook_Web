@@ -24,4 +24,16 @@ var publicationRoutes = []Route{
 		Func:           controllers.UnlikePublication,
 		AuthIsRequired: true,
 	},
+	{
+		URI:            "/publications/{publicationId}/update",
+		Method:         http.MethodGet,
+		Func:           controllers.LoadEditPublicationScreen,
+		AuthIsRequired: true,
+	},
+	{
+		URI:            "/publications/{publicationId}",
+		Method:         http.MethodPut,
+		Func:           controllers.UpdatePublication,
+		AuthIsRequired: true,
+	},
 }
