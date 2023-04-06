@@ -6,35 +6,25 @@ import (
 	"fmt"
 	"net/http"
 	"web/src/config"
+	"web/src/requests"
 	"web/src/responses"
 )
 
-// CreateUser do a request on API to create an user
-func CreateUser(w http.ResponseWriter, r *http.Request) {
+// CreatePublication
+func CreatePublication(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
-	name := r.FormValue("name")
-	email := r.FormValue("email")
-	nick := r.FormValue("nick")
-	password := r.FormValue("password")
-
-	user, err := json.Marshal(map[string]string{
-		"name":     name,
-		"email":    email,
-		"nick":     nick,
-		"password": password,
+	publication, err := json.Marshal(map[string]string{
+		"title":   r.FormValue("title"),
+		"content": r.FormValue("content"),
 	})
 	if err != nil {
 		responses.JSON(w, http.StatusBadRequest, responses.ErrorAPI{Err: err.Error()})
 		return
 	}
 
-	url := fmt.Sprintf("%s/users", config.URL_API)
-	response, err := http.Post(
-		url,
-		"application/json",
-		bytes.NewBuffer(user),
-	)
+	url := fmt.Sprintf("%s/publications", config.URL_API)
+	response, err := requests.DoAuthRequest(r, http.MethodPost, url, bytes.NewBuffer(publication))
 	if err != nil {
 		responses.JSON(w, http.StatusInternalServerError, responses.ErrorAPI{Err: err.Error()})
 		return
@@ -47,4 +37,5 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	responses.JSON(w, response.StatusCode, nil)
+
 }

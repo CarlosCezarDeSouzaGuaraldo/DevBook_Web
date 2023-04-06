@@ -1,10 +1,15 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"web/src/config"
+	"web/src/cookies"
+	"web/src/models"
 	"web/src/requests"
+	"web/src/responses"
 	"web/src/utils"
 )
 
@@ -23,7 +28,31 @@ func LoadHomePage(w http.ResponseWriter, r *http.Request) {
 
 	url := fmt.Sprintf("%s/publications", config.URL_API)
 	response, err := requests.DoAuthRequest(r, http.MethodGet, url, nil)
-	fmt.Println(response.StatusCode, err)
+	if err != nil {
+		responses.JSON(w, http.StatusInternalServerError, responses.ErrorAPI{Err: err.Error()})
+		return
+	}
+	defer response.Body.Close()
 
-	utils.ExecuteTemplate(w, "home.html", nil)
+	if response.StatusCode >= 400 {
+		responses.FixStatusCodeError(w, response)
+		return
+	}
+
+	var publications []models.Publications
+	if err = json.NewDecoder(response.Body).Decode(&publications); err != nil {
+		responses.JSON(w, http.StatusUnprocessableEntity, responses.ErrorAPI{Err: err.Error()})
+		return
+	}
+
+	cookie, _ := cookies.Read(r)
+	userID, _ := strconv.ParseUint(cookie["id"], 10, 64)
+
+	utils.ExecuteTemplate(w, "home.html", struct {
+		Publications []models.Publications
+		UserID       uint64
+	}{
+		Publications: publications,
+		UserID:       userID,
+	})
 }
