@@ -123,3 +123,30 @@ func LoadUsersPage(w http.ResponseWriter, r *http.Request) {
 
 	utils.ExecuteTemplate(w, "users.html", users)
 }
+
+// LoadProfileUser do a request on API to create an user
+func LoadProfileUser(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	userID, err := strconv.ParseUint(params["userId"], 10, 64)
+	if err != nil {
+		responses.JSON(w, http.StatusBadRequest, responses.ErrorAPI{Err: err.Error()})
+		return
+	}
+
+	user, err := models.FindCompleteUser(userID, r)
+	if err != nil {
+		responses.JSON(w, http.StatusInternalServerError, responses.ErrorAPI{Err: err.Error()})
+		return
+	}
+
+	cookie, _ := cookies.Read(r)
+	userLogged, _ := strconv.ParseUint(cookie["id"], 10, 64)
+
+	utils.ExecuteTemplate(w, "user.html", struct {
+		User         models.User
+		UserLoggedID uint64
+	}{
+		User:         user,
+		UserLoggedID: userLogged,
+	})
+}

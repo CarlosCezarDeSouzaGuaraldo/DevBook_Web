@@ -5,8 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"web/src/config"
+	"web/src/requests"
 	"web/src/responses"
+
+	"github.com/gorilla/mux"
 )
 
 // CreateUser do a request on API to create an user
@@ -35,6 +39,56 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		"application/json",
 		bytes.NewBuffer(user),
 	)
+	if err != nil {
+		responses.JSON(w, http.StatusInternalServerError, responses.ErrorAPI{Err: err.Error()})
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		responses.FixStatusCodeError(w, response)
+		return
+	}
+
+	responses.JSON(w, response.StatusCode, nil)
+}
+
+// UnfollowUser do a request on API to unfollow an user
+func UnfollowUser(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	userID, err := strconv.ParseUint(params["userId"], 10, 64)
+	if err != nil {
+		responses.JSON(w, http.StatusBadRequest, responses.ErrorAPI{Err: err.Error()})
+		return
+	}
+
+	url := fmt.Sprintf("%s/users/%d/unfollow", config.URL_API, userID)
+	response, err := requests.DoAuthRequest(r, http.MethodPost, url, nil)
+	if err != nil {
+		responses.JSON(w, http.StatusInternalServerError, responses.ErrorAPI{Err: err.Error()})
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		responses.FixStatusCodeError(w, response)
+		return
+	}
+
+	responses.JSON(w, response.StatusCode, nil)
+}
+
+// FollowUser do a request on API to follow an user
+func FollowUser(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	userID, err := strconv.ParseUint(params["userId"], 10, 64)
+	if err != nil {
+		responses.JSON(w, http.StatusBadRequest, responses.ErrorAPI{Err: err.Error()})
+		return
+	}
+
+	url := fmt.Sprintf("%s/users/%d/follow", config.URL_API, userID)
+	response, err := requests.DoAuthRequest(r, http.MethodPost, url, nil)
 	if err != nil {
 		responses.JSON(w, http.StatusInternalServerError, responses.ErrorAPI{Err: err.Error()})
 		return

@@ -1,7 +1,6 @@
 package cookies
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 	"web/src/config"
@@ -25,7 +24,6 @@ func Save(w http.ResponseWriter, ID, token string) error {
 
 	encryptedData, err := s.Encode("data", data)
 	if err != nil {
-		fmt.Println("entrou aqui")
 		return err
 	}
 
