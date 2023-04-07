@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"web/src/config"
 	"web/src/cookies"
 	"web/src/models"
@@ -17,6 +18,12 @@ import (
 
 // LoadLoginScreen render the login screen
 func LoadLoginScreen(w http.ResponseWriter, r *http.Request) {
+	cookie, _ := cookies.Read(r)
+	if cookie["token"] != "" {
+		http.Redirect(w, r, "/home", 302)
+		return
+	}
+
 	utils.ExecuteTemplate(w, "login.html", nil)
 }
 
@@ -88,4 +95,31 @@ func LoadEditPublicationScreen(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.ExecuteTemplate(w, "update-publication.html", publication)
+}
+
+// LoadUsersPage render the users list screen
+func LoadUsersPage(w http.ResponseWriter, r *http.Request) {
+	nameOrNick := strings.ToLower(r.URL.Query().Get("user"))
+
+	url := fmt.Sprintf("%s/users?user=%s", config.URL_API, nameOrNick)
+
+	response, err := requests.DoAuthRequest(r, http.MethodGet, url, nil)
+	if err != nil {
+		responses.JSON(w, http.StatusInternalServerError, responses.ErrorAPI{Err: err.Error()})
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		responses.FixStatusCodeError(w, response)
+		return
+	}
+
+	var users []models.User
+	if err = json.NewDecoder(response.Body).Decode(&users); err != nil {
+		responses.JSON(w, http.StatusUnprocessableEntity, responses.ErrorAPI{Err: err.Error()})
+		return
+	}
+
+	utils.ExecuteTemplate(w, "users.html", users)
 }
