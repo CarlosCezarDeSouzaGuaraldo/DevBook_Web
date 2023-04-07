@@ -10,7 +10,11 @@ function createUser(event) {
     const confirmPassword = $('#confirmPassword').val();
 
     if (password !== confirmPassword) {
-        alert("The password are diferent");
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'The password are diferent!'
+        });
         return;
     }
 
@@ -24,8 +28,33 @@ function createUser(event) {
             password: password,
         }
     }).done(() => {
-        alert("User created successfully")
-    }).fail((error) => {
-        alert("Error creating user")
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: 'User created successfully!'
+        }).then(() => {
+            $.ajax({
+                url: "/login",
+                method: 'POST',
+                data: {
+                    email: email,
+                    password: password,
+                }
+            }).done(() => {
+                window.location = '/home';
+            }).fail(() => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Something went wrong!'
+                });
+            });
+        });
+    }).fail(() => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Something went wrong!'
+        });
     });
 };

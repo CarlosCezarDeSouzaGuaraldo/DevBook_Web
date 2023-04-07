@@ -16,6 +16,10 @@ function doLogin(event) {
     }).done(() => {
         window.location = "/home";
     }).fail(() => {
-        alert("Invalid user or password")
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'User or password invalids!'
+        });
     });
 }

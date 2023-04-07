@@ -4,6 +4,7 @@ $(document).on('click', '.like-publication', likePublication);
 $(document).on('click', '.unlike-publication', unlikePublication);
 
 $('#update-publication').on('click', updatePublication);
+$('.delete-publication').on('click', deletePublication);
 
 function createPublication(event) {
     event.preventDefault();
@@ -19,10 +20,17 @@ function createPublication(event) {
             content: content,
         }
     }).done(() => {
-        alert("Publication created successfully");
         window.location = "/home";
-    }).fail(() => {
-        alert("Error creating publication");
+    }).fail((err) => {
+        if (err && err.status >= 400) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Something went wrong!'
+            });
+        } else {
+            window.location = "/home";
+        }
     });
 }
 
@@ -45,7 +53,11 @@ function likePublication(event) {
         element.addClass('text-danger');
         element.removeClass('like-publication');
     }).fail(() => {
-        alert("Error liking publication");
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Something went wrong!'
+        });
     }).always(() => {
         element.prop('disabled', false);
     });
@@ -70,7 +82,11 @@ function unlikePublication(event) {
         element.removeClass('text-danger');
         element.addClass('like-publication');
     }).fail(() => {
-        alert("Error liking publication");
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Something went wrong!'
+        });
     }).always(() => {
         element.prop('disabled', false);
     });
@@ -91,10 +107,56 @@ function updatePublication() {
             content: content,
         },
     }).done(() => {
-        alert('oi')
+        Swal.fire({
+            title: 'Success!',
+            text: 'Publication updated successfully!',
+            icon: 'success'
+        }).then(() => {
+            window.location = '/home';
+        });
     }).fail(() => {
-        alert('tchau')
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Something went wrong!'
+        });
     }).always(() => {
         $('#update-publication').prop('disabled', false);
+    });
+}
+
+function deletePublication(event) {
+    event.preventDefault();
+
+    Swal.fire({
+        icon: 'warning',
+        title: 'Attention!',
+        text: 'Are you sure you want to delete this post? This action is irreversible!',
+        showCancelButton: true,
+        cancelButtonText: "Cancel"
+    }).then((confirmation) => {
+        if (!confirmation.value) return;
+
+        const element = $(event.target);
+        const publication = element.closest('div');
+        const publicationId = publication.data('publication-id');
+
+        element.prop('disabled', true);
+        $.ajax({
+            url: `/publications/${publicationId}`,
+            method: "DELETE",
+        }).done(() => {
+            publication.fadeOut('slow', () => {
+                $(this).remove();
+            });
+        }).fail(() => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Something went wrong!'
+            });
+        }).always(() => {
+            element.prop('disabled', false);
+        });
     });
 }

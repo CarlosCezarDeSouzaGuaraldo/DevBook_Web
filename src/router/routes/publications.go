@@ -36,4 +36,10 @@ var publicationRoutes = []Route{
 		Func:           controllers.UpdatePublication,
 		AuthIsRequired: true,
 	},
+	{
+		URI:            "/publications/{publicationId}",
+		Method:         http.MethodDelete,
+		Func:           controllers.DeletePublication,
+		AuthIsRequired: true,
+	},
 }
