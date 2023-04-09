@@ -11,7 +11,7 @@ function createUser(event) {
 
     if (password !== confirmPassword) {
         Swal.fire({
-            icon: 'error',
+            icon: 'warning',
             title: 'Oops...',
             text: 'The password are diferent!'
         });

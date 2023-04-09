@@ -30,24 +30,28 @@
                             }}
                         </h6>
                         <p class="card-text">
-                            <a href="#">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#modal-followers">
                                 Followers: {{ len .User.Followers }}
-                            </a>
+                            </button>
                         </p>
                         <p class="card-text">
-                            <a href="#">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#modal-following">
                                 Following: {{ len .User.Following }}
-                            </a>
+                            </button>
                         </p>
-                        {{ if $followedByLoggedUser }}
-                        <button id="unfollow" class="btn btn-info" data-user-id="{{ .User.ID }}">
-                            Unfollow
-                        </button>
-                        {{ else }}
-                        <button id="follow" class="btn btn-info" data-user-id="{{ .User.ID }}">
-                            Follow
-                        </button>
-                        {{ end }}
+                        <a href="#" class="card-link">
+                            {{ if $followedByLoggedUser }}
+                            <button id="unfollow" class="btn btn-info" data-user-id="{{ .User.ID }}">
+                                Unfollow'
+                            </button>
+                            {{ else }}
+                            <button id="follow" class="btn btn-info" data-user-id="{{ .User.ID }}">
+                                Follow
+                            </button>
+                            {{ end }}
+                        </a>
                     </div>
                 </div>
             </div>
@@ -74,6 +78,8 @@
         </div>
     </div>
 
+    {{ template "modal-followers" .User }}
+    {{ template "modal-following" .User }}
     {{ template "footer" }}
     {{ template "scripts" }}
 

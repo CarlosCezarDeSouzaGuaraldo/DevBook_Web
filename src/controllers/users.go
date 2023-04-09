@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"web/src/config"
+	"web/src/cookies"
 	"web/src/requests"
 	"web/src/responses"
 
@@ -89,6 +90,78 @@ func FollowUser(w http.ResponseWriter, r *http.Request) {
 
 	url := fmt.Sprintf("%s/users/%d/follow", config.URL_API, userID)
 	response, err := requests.DoAuthRequest(r, http.MethodPost, url, nil)
+	if err != nil {
+		responses.JSON(w, http.StatusInternalServerError, responses.ErrorAPI{Err: err.Error()})
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		responses.FixStatusCodeError(w, response)
+		return
+	}
+
+	responses.JSON(w, response.StatusCode, nil)
+}
+
+// UpdatePassword a request on API to edit the logged user
+func UpdatePassword(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	password := r.FormValue("password")
+	current := r.FormValue("current")
+
+	body, err := json.Marshal(map[string]string{
+		"password": password,
+		"current":  current,
+	})
+	if err != nil {
+		responses.JSON(w, http.StatusBadRequest, responses.ErrorAPI{Err: err.Error()})
+		return
+	}
+
+	cookie, _ := cookies.Read(r)
+	userID, _ := strconv.ParseUint(cookie["id"], 10, 64)
+
+	url := fmt.Sprintf("%s/users/%d/update-password", config.URL_API, userID)
+	response, err := requests.DoAuthRequest(r, http.MethodPost, url, bytes.NewBuffer(body))
+	if err != nil {
+		responses.JSON(w, http.StatusInternalServerError, responses.ErrorAPI{Err: err.Error()})
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		responses.FixStatusCodeError(w, response)
+		return
+	}
+
+	responses.JSON(w, response.StatusCode, nil)
+}
+
+// EditUser a request on API to edit the logged user
+func EditUser(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	name := r.FormValue("name")
+	email := r.FormValue("email")
+	nick := r.FormValue("nick")
+
+	user, err := json.Marshal(map[string]string{
+		"name":  name,
+		"email": email,
+		"nick":  nick,
+	})
+	if err != nil {
+		responses.JSON(w, http.StatusBadRequest, responses.ErrorAPI{Err: err.Error()})
+		return
+	}
+
+	cookie, _ := cookies.Read(r)
+	userID, _ := strconv.ParseUint(cookie["id"], 10, 64)
+
+	url := fmt.Sprintf("%s/users/%d", config.URL_API, userID)
+	response, err := requests.DoAuthRequest(r, http.MethodPut, url, bytes.NewBuffer(user))
 	if err != nil {
 		responses.JSON(w, http.StatusInternalServerError, responses.ErrorAPI{Err: err.Error()})
 		return

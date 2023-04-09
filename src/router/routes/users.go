@@ -42,4 +42,34 @@ var userRoutes = []Route{
 		Func:           controllers.FollowUser,
 		AuthIsRequired: true,
 	},
+	{
+		URI:            "/profile",
+		Method:         http.MethodGet,
+		Func:           controllers.LoadLoggedProfileUser,
+		AuthIsRequired: true,
+	},
+	{
+		URI:            "/edit-user",
+		Method:         http.MethodGet,
+		Func:           controllers.LoadEditProfileUserScreen,
+		AuthIsRequired: true,
+	},
+	{
+		URI:            "/edit-user",
+		Method:         http.MethodPut,
+		Func:           controllers.EditUser,
+		AuthIsRequired: true,
+	},
+	{
+		URI:            "/update-password",
+		Method:         http.MethodGet,
+		Func:           controllers.LoadUpdatePasswordScreen,
+		AuthIsRequired: true,
+	},
+	{
+		URI:            "/update-password",
+		Method:         http.MethodPost,
+		Func:           controllers.UpdatePassword,
+		AuthIsRequired: true,
+	},
 }

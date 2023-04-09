@@ -124,7 +124,7 @@ func LoadUsersPage(w http.ResponseWriter, r *http.Request) {
 	utils.ExecuteTemplate(w, "users.html", users)
 }
 
-// LoadProfileUser do a request on API to create an user
+// LoadProfileUser do a request on API to get an user
 func LoadProfileUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userID, err := strconv.ParseUint(params["userId"], 10, 64)
@@ -133,14 +133,18 @@ func LoadProfileUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	cookie, _ := cookies.Read(r)
+	userLogged, _ := strconv.ParseUint(cookie["id"], 10, 64)
+
+	if userID == userLogged {
+		http.Redirect(w, r, "/profile", 302)
+	}
+
 	user, err := models.FindCompleteUser(userID, r)
 	if err != nil {
 		responses.JSON(w, http.StatusInternalServerError, responses.ErrorAPI{Err: err.Error()})
 		return
 	}
-
-	cookie, _ := cookies.Read(r)
-	userLogged, _ := strconv.ParseUint(cookie["id"], 10, 64)
 
 	utils.ExecuteTemplate(w, "user.html", struct {
 		User         models.User
@@ -149,4 +153,40 @@ func LoadProfileUser(w http.ResponseWriter, r *http.Request) {
 		User:         user,
 		UserLoggedID: userLogged,
 	})
+}
+
+// LoadLoggedProfileUser do a request on API to get the logged user
+func LoadLoggedProfileUser(w http.ResponseWriter, r *http.Request) {
+	cookie, _ := cookies.Read(r)
+	userLogged, _ := strconv.ParseUint(cookie["id"], 10, 64)
+
+	user, err := models.FindCompleteUser(userLogged, r)
+	if err != nil {
+		responses.JSON(w, http.StatusInternalServerError, responses.ErrorAPI{Err: err.Error()})
+		return
+	}
+
+	utils.ExecuteTemplate(w, "profile.html", user)
+}
+
+// LoadEditProfileUserScreen load the profile user screen
+func LoadEditProfileUserScreen(w http.ResponseWriter, r *http.Request) {
+	cookie, _ := cookies.Read(r)
+	userLoggedID, _ := strconv.ParseUint(cookie["id"], 10, 64)
+
+	channel := make(chan models.User)
+	go models.GetUserData(channel, userLoggedID, r)
+	user := <-channel
+
+	if user.ID == 0 {
+		responses.JSON(w, http.StatusInternalServerError, responses.ErrorAPI{Err: "Error to find user"})
+		return
+	}
+
+	utils.ExecuteTemplate(w, "edit-user.html", user)
+}
+
+// LoadUpdatePasswordScreen load the update user password screen
+func LoadUpdatePasswordScreen(w http.ResponseWriter, r *http.Request) {
+	utils.ExecuteTemplate(w, "update-password.html", nil)
 }
