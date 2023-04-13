@@ -16,7 +16,7 @@ DevBook is a social network developed in the GO programming language, where user
 2. Create at the root of the project one file ```.env``` based on the ```template.env``` file and fill the .env file according to the settings you want to execute.
 3. Open the command prompt and navigate to the root directory of the application.
 4. Execute the command line ```go run web``` and type ```Enter```.
-5. If everything went well, a message like this should appear in your command prompt: ```WEB application running on localhost:3000.```
+5. If everything went well, a message like this should appear in your command prompt: ```WEB application running on localhost:3000```
 
 Then, you can access the application in a browser based on the information provided in the environment variables **HOST** and **PORT** in your ```.env``` file.
 
