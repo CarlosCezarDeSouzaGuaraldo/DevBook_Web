@@ -16,6 +16,6 @@ func main() {
 	utils.LoadTemplate()
 	r := router.Generate()
 
-	fmt.Printf("WEB listening on PORT: %d\n", config.PORT)
+	fmt.Printf(fmt.Sprintf("WEB application running on %s:%d\n", config.HOST, config.PORT))
 	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%d", config.HOST, config.PORT), r))
 }
