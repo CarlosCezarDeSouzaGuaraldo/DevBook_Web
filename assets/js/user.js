@@ -2,6 +2,7 @@ $('#unfollow').on('click', unfollowUser);
 $('#follow').on('click', followUser);
 $('#edit-user').on('submit', editUser);
 $('#update-password').on('submit', updatePassword);
+$('#remove-user').on('click', deleteUser);
 
 function unfollowUser() {
     const userId = $(this).data('user-id');
@@ -105,4 +106,35 @@ function updatePassword(event) {
         });
     });
 
+}
+
+function deleteUser() {
+    Swal.fire({
+        title: "Warning!",
+        text: "Are you sure you want to delete the account permanently? This action is irreversible!",
+        showCancelButton: true,
+        cancelButtonText: "Cancel",
+        icon: "warning"
+    }).then((confirmation) => {
+        if (confirmation.value) {
+            $.ajax({
+                url: "/remove-user",
+                method: "DELETE"
+            }).done(() => {
+                Swal.fire(
+                    "Success!",
+                    "Your account was excluded successfully!",
+                    'success'
+                ).then(() => {
+                    window.location = "/logout";
+                })
+            }).fail(() => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Something went wrong!'
+                });
+            })
+        }
+    });
 }

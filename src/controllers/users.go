@@ -112,8 +112,8 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request) {
 	current := r.FormValue("current")
 
 	body, err := json.Marshal(map[string]string{
-		"new": new,
-		"current":  current,
+		"new":     new,
+		"current": current,
 	})
 	if err != nil {
 		responses.JSON(w, http.StatusBadRequest, responses.ErrorAPI{Err: err.Error()})
@@ -162,6 +162,27 @@ func EditUser(w http.ResponseWriter, r *http.Request) {
 
 	url := fmt.Sprintf("%s/users/%d", config.URL_API, userID)
 	response, err := requests.DoAuthRequest(r, http.MethodPut, url, bytes.NewBuffer(user))
+	if err != nil {
+		responses.JSON(w, http.StatusInternalServerError, responses.ErrorAPI{Err: err.Error()})
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		responses.FixStatusCodeError(w, response)
+		return
+	}
+
+	responses.JSON(w, response.StatusCode, nil)
+}
+
+// RemoveUser a request on API to remove the logged user
+func RemoveUser(w http.ResponseWriter, r *http.Request) {
+	cookie, _ := cookies.Read(r)
+	userID, _ := strconv.ParseUint(cookie["id"], 10, 64)
+
+	url := fmt.Sprintf("%s/users/%d", config.URL_API, userID)
+	response, err := requests.DoAuthRequest(r, http.MethodDelete, url, nil)
 	if err != nil {
 		responses.JSON(w, http.StatusInternalServerError, responses.ErrorAPI{Err: err.Error()})
 		return
