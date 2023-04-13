@@ -69,11 +69,11 @@ function editUser(event) {
 function updatePassword(event) {
     event.preventDefault();
 
-    const password = $('#currently-password').val();
-    const current = $('#new-password').val();
+    const password = $('#new-password').val();
+    const current = $('#currently-password').val();
     const confirmPassword = $('#confirm-password').val();
 
-    if (current !== confirmPassword) {
+    if (password !== confirmPassword) {
         Swal.fire({
             icon: 'warning',
             title: 'Oops...',
@@ -86,7 +86,7 @@ function updatePassword(event) {
         url: "/update-password",
         method: "POST",
         data: {
-            password: password,
+            new: password,
             current: current
         }
     }).done(() => {

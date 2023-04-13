@@ -108,11 +108,11 @@ func FollowUser(w http.ResponseWriter, r *http.Request) {
 func UpdatePassword(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
-	password := r.FormValue("password")
+	new := r.FormValue("new")
 	current := r.FormValue("current")
 
 	body, err := json.Marshal(map[string]string{
-		"password": password,
+		"new": new,
 		"current":  current,
 	})
 	if err != nil {
